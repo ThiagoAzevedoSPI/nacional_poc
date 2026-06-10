@@ -1,0 +1,13 @@
+# Dependencias de treino do RF-DETR (maquina com GPU CUDA).
+#
+# IMPORTANTE: instale o PyTorch com CUDA ANTES, conforme a sua maquina/driver:
+#   https://pytorch.org/get-started/locally/
+#   ex (CUDA 12.1): pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+# Depois:
+#   pip install -r requirements.txt
+
+rfdetr               # modelo + pipeline de treino (puxa torch, torchvision, pycocotools, supervision)
+onnx                 # export para ONNX (deploy DeepStream/TensorRT)
+onnxruntime          # validar/inspecionar o ONNX exportado
+supervision          # visualizacao de deteccoes (inferencia/QA)
+tensorboard          # logs de treino (opcional, --tensorboard)

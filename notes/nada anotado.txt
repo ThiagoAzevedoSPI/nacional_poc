@@ -1,0 +1,19 @@
+nada anotado:
+imagens 19-26, 36-37, 42-43 (Alça quebrada_amassada)
+imagens 76-81, 86 (Dupla tara)
+imagens 159-163 (Outra Marca)
+imagens 178-184, 203-208, 211, 216-218 (Sem borracha)
+imagens 240-246, 256-258 (Sem tara)
+imagens 322-328, 341-343 (Tara com defeito)
+imagens 369-389 (Tara sobre tara)
+
+total anotado por erro:
+Alça quebrada amassada: 38
+Dupla tara: 36
+Enferrujada: 42
+Outra marca: 40
+Sem borracha: 29
+Sem tara: 33
+Sujo: 42
+Tara com defeito: 32
+Tara sobre tara: 29

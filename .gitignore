@@ -1,0 +1,25 @@
+# Dados pesados — não versionar (são GB de imagens/zip)
+/data/
+
+# Saídas de treino
+/training/output/
+*.pth
+*.onnx
+*.engine
+
+# Ferramenta externa (tem o próprio repo git: cvat-ai/cvat)
+/tools/cvat/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Enviroment variables
+.env
