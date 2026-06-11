@@ -1,3 +1,0 @@
-deepstream: docker run --rm nvcr.io/nvidia/deepstream:6.4-samples-multiarch --version
-
-tao toolkit: docker run --rm nvcr.io/nvidia/tao/tao-toolkit:5.0.0-tf2.11.0 --version
