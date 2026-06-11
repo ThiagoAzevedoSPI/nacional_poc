@@ -4,38 +4,47 @@ Esta pasta roda na **máquina mais potente com GPU NVIDIA (CUDA)**, não no PC d
 
 ## 1. O que copiar para a máquina de treino
 
+Use `python scripts/make_training_package.py` (no PC de preparo) — o zip gerado já contém tudo:
+
 - `data/dataset_rfdetr/` (o dataset já no formato RF-DETR — ~2 GB)
 - esta pasta `training/`
+- `pyproject.toml` + `uv.lock` (ambiente reproduzível via uv)
 
 > O resto do projeto (`data/raw/`, `tools/cvat/`, `scripts/`) **não** é necessário para treinar.
 
-## 2. Setup do ambiente
+## 2. Setup do ambiente (uv)
 
-Requer **Python ≥ 3.10** e GPU NVIDIA com driver + CUDA.
+Requer GPU NVIDIA com driver + CUDA e o [uv](https://docs.astral.sh/uv/) instalado:
 
 ```bash
-python -m venv .venv
-# Linux/Mac: source .venv/bin/activate   |   Windows: .venv\Scripts\activate
+# instalar uv (se ainda não tiver):
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 1) PyTorch COM CUDA (escolha a versão de CUDA da sua máquina):
-#    https://pytorch.org/get-started/locally/
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
-
-# 2) demais dependências
-pip install -r requirements.txt
+# na raiz do pacote extraído (onde está o pyproject.toml):
+uv sync --group train
 ```
 
-Confirme que a GPU é vista: `python -c "import torch; print(torch.cuda.is_available())"` → `True`.
+O `uv sync` baixa o Python necessário sozinho (se preciso) e instala **torch 2.5.1+cu121** (índice
+oficial do PyTorch, fixado no `pyproject.toml`), `rfdetr` e as demais dependências travadas no
+`uv.lock` — além de ruff e ty (grupo dev). Não precisa instalar torch separado nem ativar a venv:
+rode tudo com `uv run`.
+
+> Se o driver da máquina exigir outra versão de CUDA, troque o índice `pytorch-cu121` no
+> `pyproject.toml` (ex.: `.../whl/cu124`) e rode `uv lock` de novo.
+
+Confirme que a GPU é vista: `uv run python -c "import torch; print(torch.cuda.is_available())"` → `True`.
 
 ## 3. Treinar
 
+Da raiz do pacote extraído (o `--dataset-dir` default já aponta para `data/dataset_rfdetr/`):
+
 ```bash
 # GPU média (T4 / RTX 12–16 GB): batch 4 × acúmulo 4 = batch efetivo 16
-python train_rfdetr.py --dataset-dir ../data/dataset_rfdetr --model medium \
+uv run python training/train_rfdetr.py --model medium \
     --epochs 50 --batch-size 4 --grad-accum 4 --early-stopping
 
 # GPU grande (A100 / H100):
-python train_rfdetr.py --dataset-dir ../data/dataset_rfdetr --model medium \
+uv run python training/train_rfdetr.py --model medium \
     --epochs 50 --batch-size 16 --grad-accum 1 --early-stopping
 ```
 
@@ -57,11 +66,11 @@ Checkpoints e logs vão para `training/output/`.
 
 ## 5. Export para deploy (DeepStream / TensorRT)
 
-Após treinar, exporte o checkpoint para ONNX:
+Após treinar, exporte o checkpoint para ONNX (`uv run python` da raiz do pacote):
 
 ```python
 from rfdetr import RFDETRMedium
-model = RFDETRMedium(pretrain_weights="output/checkpoint_best_ema.pth")
+model = RFDETRMedium(pretrain_weights="training/output/checkpoint_best_ema.pth")
 model.export()            # gera ONNX em output/
 ```
 

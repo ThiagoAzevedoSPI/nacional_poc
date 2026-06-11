@@ -1,0 +1,54 @@
+[project]
+name = "nacional-poc"
+version = "0.1.0"
+description = "PoC de detecção de defeitos em botijões P13 com RF-DETR"
+# o teto <3.13 vem dos wheels cu121 do PyTorch (só existem até cp312)
+requires-python = ">=3.11,<3.13"
+# Os scripts de preparo (scripts/) usam só a stdlib. As dependências de treino
+# ficam no grupo `train`, instalado apenas na máquina com GPU (uv sync --group train).
+dependencies = []
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "I",   # isort (ordenação de imports)
+    "UP",  # pyupgrade
+    "B",   # bugbear
+    "SIM", # simplificações
+]
+
+[tool.ty.rules]
+# rfdetr/torch só existem na máquina de treino (GPU); aqui viram warning.
+unresolved-import = "warn"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.17",
+    "ty>=0.0.48",
+]
+# instalar SÓ na máquina de treino: uv sync --group train
+train = [
+    "torch",
+    "torchvision",
+    "rfdetr",          # modelo + pipeline de treino
+    "onnx",            # export para ONNX (deploy DeepStream/TensorRT)
+    "onnxruntime",     # validar/inspecionar o ONNX exportado
+    "supervision",     # visualização de detecções (inferência/QA)
+    "tensorboard",     # logs de treino (opcional, --tensorboard)
+]
+
+# torch/torchvision com CUDA: vêm do índice oficial do PyTorch (cu121),
+# não do PyPI (que distribui a build CPU no Linux).
+[tool.uv.sources]
+torch = { index = "pytorch-cu121" }
+torchvision = { index = "pytorch-cu121" }
+
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true

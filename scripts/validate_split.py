@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Valida o dataset RF-DETR gerado em data/dataset_rfdetr/.
 
@@ -7,7 +6,10 @@ entre splits, bboxes dentro dos limites, placeholder id 0 nunca usado.
 
 Uso: python scripts/validate_split.py
 """
-import json, os, collections
+
+import collections
+import json
+import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_DIR = os.path.join(ROOT, "data", "dataset_rfdetr")
@@ -22,7 +24,8 @@ def main():
 
     for sp in SPLITS:
         sp_dir = os.path.join(OUT_DIR, sp)
-        coco = json.load(open(os.path.join(sp_dir, "_annotations.coco.json"), encoding="utf-8"))
+        with open(os.path.join(sp_dir, "_annotations.coco.json"), encoding="utf-8") as f:
+            coco = json.load(f)
 
         disk = set(f for f in os.listdir(sp_dir) if not f.endswith(".json"))
         json_files = set(im["file_name"] for im in coco["images"])
@@ -57,10 +60,16 @@ def main():
         if 0 in used:
             problems.append(f"[{sp}] placeholder id 0 usado por anotacao!")
 
-        print(f"[{sp}] imgs(json)={len(coco['images'])} imgs(disco)={len(disk)} "
-              f"anns={len(coco['annotations'])} cats={len(coco['categories'])} classes_usadas={sorted(used)}")
+        print(
+            f"[{sp}] imgs(json)={len(coco['images'])} imgs(disco)={len(disk)} "
+            f"anns={len(coco['annotations'])} cats={len(coco['categories'])} classes_usadas={sorted(used)}"
+        )
 
-    for label, counter in (("image_id", all_img_ids), ("annotation_id", all_ann_ids), ("basename", all_basenames)):
+    for label, counter in (
+        ("image_id", all_img_ids),
+        ("annotation_id", all_ann_ids),
+        ("basename", all_basenames),
+    ):
         dups = {k: v for k, v in counter.items() if v > 1}
         if dups:
             problems.append(f"{label} repetido entre splits: {list(dups)[:10]}")

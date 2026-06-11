@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Analise exploratoria do export COCO do CVAT (data/raw/cvat_export_coco.zip).
 
@@ -7,7 +6,11 @@ classe, e duplicidade de basename. Nao altera nada.
 
 Uso: python scripts/analyze_dataset.py
 """
-import json, collections, os, zipfile
+
+import collections
+import json
+import os
+import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ZIP_PATH = os.path.join(ROOT, "data", "raw", "cvat_export_coco.zip")
@@ -41,7 +44,8 @@ def main():
     tot_a = tot_v = 0
     for f in sorted(rows):
         a, v = rows[f]["anotada"], rows[f]["vazia"]
-        tot_a += a; tot_v += v
+        tot_a += a
+        tot_v += v
         print(f"  {f:28s} anotadas={a:3d}  vazias={v:3d}")
     print(f"  {'TOTAL':28s} anotadas={tot_a:3d}  vazias={tot_v:3d}\n")
 

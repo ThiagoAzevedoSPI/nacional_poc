@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Gera o dataset RF-DETR a partir do export COCO do CVAT.
 
@@ -14,7 +13,12 @@ Decisoes (ver notes/ e a memoria do projeto):
 
 Uso: python scripts/build_split.py
 """
-import json, os, random, zipfile, collections
+
+import collections
+import json
+import os
+import random
+import zipfile
 
 SEED = 42
 RATIO_VAL = 0.15
@@ -70,7 +74,7 @@ def main():
             n_train = n - n_val - n_test
             assert n_train > 0, f"classe {catname[cid]} sem treino (n={n})"
             parts = (["train"] * n_train) + (["valid"] * n_val) + (["test"] * n_test)
-            for im, sp in zip(imgs, parts):
+            for im, sp in zip(imgs, parts, strict=True):
                 assignment[im["id"]] = sp
                 report[catname[cid]][sp] += 1
 
@@ -88,27 +92,35 @@ def main():
         split_anns = {sp: [] for sp in SPLITS}
         for im in annotated:
             sp = assignment[im["id"]]
-            split_images[sp].append({
-                "id": im["id"],
-                "license": im.get("license", 0),
-                "file_name": basename(im["file_name"]),  # flat
-                "height": im["height"],
-                "width": im["width"],
-                "date_captured": im.get("date_captured", 0),
-            })
+            split_images[sp].append(
+                {
+                    "id": im["id"],
+                    "license": im.get("license", 0),
+                    "file_name": basename(im["file_name"]),  # flat
+                    "height": im["height"],
+                    "width": im["width"],
+                    "date_captured": im.get("date_captured", 0),
+                }
+            )
             for a in ann_by_img[im["id"]]:
-                split_anns[sp].append({
-                    "id": a["id"],
-                    "image_id": a["image_id"],
-                    "category_id": a["category_id"],
-                    "segmentation": a.get("segmentation", []),
-                    "area": a.get("area", a["bbox"][2] * a["bbox"][3]),
-                    "bbox": a["bbox"],
-                    "iscrowd": a.get("iscrowd", 0),
-                })
+                split_anns[sp].append(
+                    {
+                        "id": a["id"],
+                        "image_id": a["image_id"],
+                        "category_id": a["category_id"],
+                        "segmentation": a.get("segmentation", []),
+                        "area": a.get("area", a["bbox"][2] * a["bbox"][3]),
+                        "bbox": a["bbox"],
+                        "iscrowd": a.get("iscrowd", 0),
+                    }
+                )
 
         licenses = d.get("licenses", [{"name": "", "id": 0, "url": ""}])
-        info = {"description": "Vasilhames Nacional - defeitos (RF-DETR)", "version": "1.0", "year": 2026}
+        info = {
+            "description": "Vasilhames Nacional - defeitos (RF-DETR)",
+            "version": "1.0",
+            "year": 2026,
+        }
 
         # mapa basename -> entry (basenames sao unicos; evita problema de acento na pasta)
         entry_by_bn = {}
@@ -118,8 +130,13 @@ def main():
 
         total = 0
         for sp in SPLITS:
-            coco = {"info": info, "licenses": licenses, "categories": categories,
-                    "images": split_images[sp], "annotations": split_anns[sp]}
+            coco = {
+                "info": info,
+                "licenses": licenses,
+                "categories": categories,
+                "images": split_images[sp],
+                "annotations": split_anns[sp],
+            }
             with open(os.path.join(OUT_DIR, sp, "_annotations.coco.json"), "w", encoding="utf-8") as f:
                 json.dump(coco, f, ensure_ascii=False)
             for im in split_images[sp]:

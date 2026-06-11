@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Treino do RF-DETR no dataset de defeitos de vasilhames.
 
@@ -21,6 +20,7 @@ Exemplos:
 
 Mantenha batch-size * grad-accum = 16 (batch efetivo recomendado pelo RF-DETR).
 """
+
 import argparse
 import os
 import sys
@@ -36,16 +36,27 @@ MODELS = {
 def parse_args():
     p = argparse.ArgumentParser(description="Treino RF-DETR (defeitos de vasilhames)")
     here = os.path.dirname(os.path.abspath(__file__))
-    p.add_argument("--dataset-dir", default=os.path.join(here, "..", "data", "dataset_rfdetr"),
-                   help="pasta com train/ valid/ test/ (default: ../data/dataset_rfdetr)")
-    p.add_argument("--model", choices=list(MODELS), default="medium",
-                   help="tamanho do modelo (default: medium)")
+    p.add_argument(
+        "--dataset-dir",
+        default=os.path.join(here, "..", "data", "dataset_rfdetr"),
+        help="pasta com train/ valid/ test/ (default: ../data/dataset_rfdetr)",
+    )
+    p.add_argument(
+        "--model",
+        choices=list(MODELS),
+        default="medium",
+        help="tamanho do modelo (default: medium)",
+    )
     p.add_argument("--epochs", type=int, default=50)
     p.add_argument("--batch-size", type=int, default=4, help="batch por GPU")
     p.add_argument("--grad-accum", type=int, default=4, help="passos de acumulo de gradiente")
     p.add_argument("--lr", type=float, default=1e-4)
-    p.add_argument("--resolution", type=int, default=None,
-                   help="resolucao quadrada (DEVE ser divisivel por 56). Default: a do modelo.")
+    p.add_argument(
+        "--resolution",
+        type=int,
+        default=None,
+        help="resolucao quadrada (DEVE ser divisivel por 56). Default: a do modelo.",
+    )
     p.add_argument("--output-dir", default=os.path.join(here, "output"))
     p.add_argument("--early-stopping", action="store_true", help="para cedo se nao melhorar")
     p.add_argument("--tensorboard", action="store_true")
@@ -63,11 +74,14 @@ def main():
     try:
         import torch
     except ImportError:
-        sys.exit("PyTorch nao instalado. Veja training/README.md (instale torch com CUDA + pip install -r requirements.txt).")
+        sys.exit("PyTorch nao instalado. Na raiz do pacote, rode: uv sync --group train (ver training/README.md).")
 
     if not torch.cuda.is_available():
-        print("AVISO: CUDA NAO disponivel. O treino do RF-DETR e' inviavel sem GPU. "
-              "Confirme drivers NVIDIA + torch com CUDA.", file=sys.stderr)
+        print(
+            "AVISO: CUDA NAO disponivel. O treino do RF-DETR e' inviavel sem GPU. "
+            "Confirme drivers NVIDIA + torch com CUDA.",
+            file=sys.stderr,
+        )
     else:
         print(f"GPU: {torch.cuda.get_device_name(0)} | CUDA {torch.version.cuda} | torch {torch.__version__}")
 
@@ -77,11 +91,14 @@ def main():
         if not os.path.isfile(j):
             sys.exit(f"nao encontrei {j}. Confira --dataset-dir.")
 
-    from rfdetr import (RFDETRNano, RFDETRSmall, RFDETRMedium, RFDETRLarge)  # noqa: F401
+    from rfdetr import RFDETRLarge, RFDETRMedium, RFDETRNano, RFDETRSmall  # noqa: F401
+
     ModelClass = {v: globals()[v] for v in MODELS.values()}[MODELS[args.model]]
 
-    print(f"modelo={args.model} epochs={args.epochs} batch={args.batch_size} "
-          f"grad_accum={args.grad_accum} (efetivo={args.batch_size * args.grad_accum}) lr={args.lr}")
+    print(
+        f"modelo={args.model} epochs={args.epochs} batch={args.batch_size} "
+        f"grad_accum={args.grad_accum} (efetivo={args.batch_size * args.grad_accum}) lr={args.lr}"
+    )
     print(f"dataset={ds}\noutput={os.path.abspath(args.output_dir)}")
 
     model_kwargs = {}

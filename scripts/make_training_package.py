@@ -1,11 +1,11 @@
-"""Gera um .zip do pacote de treino (data/dataset_rfdetr/ + training/) pronto
-para transferir para a maquina com GPU.
+"""Gera um .zip do pacote de treino (data/dataset_rfdetr/ + training/ +
+pyproject.toml + uv.lock) pronto para transferir para a maquina com GPU.
 
 Preserva a estrutura `data/dataset_rfdetr/...` e `training/...` para que os
 comandos documentados em training/README.md (--dataset-dir ../data/dataset_rfdetr)
 funcionem apos extrair. Roda da raiz do projeto: python scripts/make_training_package.py
 """
-import os
+
 import sys
 import zipfile
 from pathlib import Path
@@ -44,10 +44,17 @@ def main() -> int:
     for f in iter_files(TRAINING):
         arc = Path("training") / f.relative_to(TRAINING)
         members.append((f, arc.as_posix()))
+    # ambiente reproduzível na máquina de treino: uv sync --group train
+    for name in ("pyproject.toml", "uv.lock"):
+        p = ROOT / name
+        if not p.is_file():
+            print(f"ERRO: nao achei {p} (rode 'uv lock' antes)", file=sys.stderr)
+            return 1
+        members.append((p, name))
 
     total = len(members)
     total_bytes = sum(f.stat().st_size for f, _ in members)
-    print(f"Empacotando {total} arquivos ({total_bytes/1024/1024:,.1f} MB) -> {OUT_ZIP.name}")
+    print(f"Empacotando {total} arquivos ({total_bytes / 1024 / 1024:,.1f} MB) -> {OUT_ZIP.name}")
 
     if OUT_ZIP.exists():
         OUT_ZIP.unlink()
@@ -63,7 +70,7 @@ def main() -> int:
 
     zsize = OUT_ZIP.stat().st_size
     print(f"OK: {OUT_ZIP}")
-    print(f"   {zsize/1024/1024:,.1f} MB ({total} arquivos)")
+    print(f"   {zsize / 1024 / 1024:,.1f} MB ({total} arquivos)")
     return 0
 
 
