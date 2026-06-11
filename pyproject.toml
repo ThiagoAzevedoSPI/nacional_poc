@@ -35,7 +35,7 @@ dev = [
 train = [
     "torch",
     "torchvision",
-    "rfdetr",          # modelo + pipeline de treino
+    "rfdetr[train,loggers]",  # modelo + pipeline de treino (extras: pytorch_lightning etc.)
     "onnx",            # export para ONNX (deploy DeepStream/TensorRT)
     "onnxruntime",     # validar/inspecionar o ONNX exportado
     "supervision",     # visualização de detecções (inferência/QA)

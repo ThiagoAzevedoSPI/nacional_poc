@@ -7,8 +7,8 @@
 *.onnx
 *.engine
 
-# Pacote de transferência gerado por scripts/make_training_package.py
-/nacional_rfdetr_training.zip
+# Pacote de transferência gerado por scripts/make_dataset_package.py
+/nacional_dataset_rfdetr.zip
 
 # Ferramenta externa (tem o próprio repo git: cvat-ai/cvat)
 /tools/cvat/

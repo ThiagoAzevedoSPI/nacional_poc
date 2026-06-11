@@ -22,8 +22,14 @@ Mantenha batch-size * grad-accum = 16 (batch efetivo recomendado pelo RF-DETR).
 """
 
 import argparse
+import io
 import os
 import sys
+
+# consoles nao-UTF-8 (ex.: Windows cp1252) quebram as tabelas de metricas do rfdetr (rich)
+for _stream in (sys.stdout, sys.stderr):
+    if isinstance(_stream, io.TextIOWrapper):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
 
 MODELS = {
     "nano": "RFDETRNano",
@@ -91,9 +97,15 @@ def main():
         if not os.path.isfile(j):
             sys.exit(f"nao encontrei {j}. Confira --dataset-dir.")
 
-    from rfdetr import RFDETRLarge, RFDETRMedium, RFDETRNano, RFDETRSmall  # noqa: F401
+    from rfdetr import RFDETRLarge, RFDETRMedium, RFDETRNano, RFDETRSmall
 
-    ModelClass = {v: globals()[v] for v in MODELS.values()}[MODELS[args.model]]
+    model_classes = {
+        "RFDETRNano": RFDETRNano,
+        "RFDETRSmall": RFDETRSmall,
+        "RFDETRMedium": RFDETRMedium,
+        "RFDETRLarge": RFDETRLarge,
+    }
+    ModelClass = model_classes[MODELS[args.model]]
 
     print(
         f"modelo={args.model} epochs={args.epochs} batch={args.batch_size} "

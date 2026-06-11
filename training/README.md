@@ -2,15 +2,18 @@
 
 Esta pasta roda na **máquina mais potente com GPU NVIDIA (CUDA)**, não no PC de anotação.
 
-## 1. O que copiar para a máquina de treino
+## 1. O que levar para a máquina de treino
 
-Use `python scripts/make_training_package.py` (no PC de preparo) — o zip gerado já contém tudo:
+O código vai via git; só o dataset (não versionado, ~2 GB) precisa ser copiado:
 
-- `data/dataset_rfdetr/` (o dataset já no formato RF-DETR — ~2 GB)
-- esta pasta `training/`
-- `pyproject.toml` + `uv.lock` (ambiente reproduzível via uv)
+```bash
+# na máquina de treino:
+git clone https://github.com/ThiagoAzevedoSPI/nacional.git
+```
 
-> O resto do projeto (`data/raw/`, `tools/cvat/`, `scripts/`) **não** é necessário para treinar.
+No PC de preparo, gere o zip do dataset com `uv run python scripts/make_dataset_package.py`
+(`nacional_dataset_rfdetr.zip`), copie-o para a máquina de treino e **extraia na raiz do clone** —
+ele recria `data/dataset_rfdetr/` no lugar certo.
 
 ## 2. Setup do ambiente (uv)
 
@@ -20,7 +23,7 @@ Requer GPU NVIDIA com driver + CUDA e o [uv](https://docs.astral.sh/uv/) instala
 # instalar uv (se ainda não tiver):
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# na raiz do pacote extraído (onde está o pyproject.toml):
+# na raiz do clone:
 uv sync --group train
 ```
 
@@ -36,7 +39,7 @@ Confirme que a GPU é vista: `uv run python -c "import torch; print(torch.cuda.i
 
 ## 3. Treinar
 
-Da raiz do pacote extraído (o `--dataset-dir` default já aponta para `data/dataset_rfdetr/`):
+Da raiz do clone (o `--dataset-dir` default já aponta para `data/dataset_rfdetr/`):
 
 ```bash
 # GPU média (T4 / RTX 12–16 GB): batch 4 × acúmulo 4 = batch efetivo 16
@@ -66,7 +69,7 @@ Checkpoints e logs vão para `training/output/`.
 
 ## 5. Export para deploy (DeepStream / TensorRT)
 
-Após treinar, exporte o checkpoint para ONNX (`uv run python` da raiz do pacote):
+Após treinar, exporte o checkpoint para ONNX (`uv run python` da raiz do clone):
 
 ```python
 from rfdetr import RFDETRMedium

@@ -58,6 +58,6 @@ Decisões do split: só as **313 imagens anotadas** (as 134 sem anotação foram
 
 ## Treino
 
-O treino roda em **outra máquina com GPU NVIDIA**. Gere o pacote com
-`uv run python scripts/make_training_package.py` (inclui dataset + `training/` + `pyproject.toml`
-+ `uv.lock`), copie o zip para lá e siga **`training/README.md`** (`uv sync --group train`).
+O treino roda em **outra máquina com GPU NVIDIA**: clone este repo lá, gere o zip do dataset
+aqui (`uv run python scripts/make_dataset_package.py` → `nacional_dataset_rfdetr.zip`), extraia-o
+na raiz do clone e siga **`training/README.md`** (`uv sync --group train`).
